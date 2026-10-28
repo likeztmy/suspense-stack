@@ -1,0 +1,12 @@
+{$DOMAIN} {
+	encode zstd gzip
+
+	handle /api/* {
+		reverse_proxy {$API_UPSTREAM:api:3000}
+	}
+
+	handle {
+		root * {$SITE_ROOT:/srv/site}
+		file_server
+	}
+}

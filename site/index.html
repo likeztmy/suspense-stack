@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Suspense Stack</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #fafaf9;
+      --fg: #1c1917;
+      --muted: #78716c;
+      --line: #e7e5e4;
+      --ok: #16a34a;
+      --bad: #dc2626;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root { --bg: #0c0a09; --fg: #f5f5f4; --muted: #a8a29e; --line: #292524; }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100dvh;
+      display: grid;
+      place-items: center;
+      padding: 16px;
+      background: var(--bg);
+      color: var(--fg);
+      font: 16px/1.5 system-ui, -apple-system, "PingFang SC", sans-serif;
+    }
+    main { width: 100%; max-width: 420px; }
+    h1 { margin: 0 0 4px; font-size: 28px; letter-spacing: -0.02em; }
+    p { margin: 0 0 24px; color: var(--muted); }
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+    }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+    .status[data-state="ok"] .dot { background: var(--ok); }
+    .status[data-state="error"] .dot { background: var(--bad); }
+    .time { margin-left: auto; color: var(--muted); font-variant-numeric: tabular-nums; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Suspense Stack</h1>
+    <p>Caddy 托管这个页面，并把 /api 转给后端。</p>
+    <div class="status" id="status" data-state="loading">
+      <span class="dot"></span>
+      <span id="label">正在连接 API…</span>
+      <span class="time" id="time"></span>
+    </div>
+  </main>
+  <script>
+    const status = document.getElementById("status");
+    const label = document.getElementById("label");
+    const time = document.getElementById("time");
+
+    fetch("/api/health")
+      .then((res) => (res.ok ? res.json() : Promise.reject(res.status)))
+      .then((data) => {
+        status.dataset.state = "ok";
+        label.textContent = "API 在线";
+        time.textContent = new Date(data.time).toLocaleTimeString();
+      })
+      .catch(() => {
+        status.dataset.state = "error";
+        label.textContent = "API 连不上";
+      });
+  </script>
+</body>
+</html>
